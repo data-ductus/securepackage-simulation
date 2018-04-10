@@ -1,0 +1,89 @@
+<div class="container-fluid" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2">
+      <div class="alert alert-info">
+        <div class="form-group">
+          <h4><strong><span class="glyphicon glyphicon-random"></span> Transport parcel</strong></h4>
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Agreement Identifier" [(ngModel)]="global.globalvars.agreement_id">
+            <span class="input-group-btn"><button class="btn btn-success" type="button" (click)="fetchAgreementData()">Confirm</button></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="item_fetched">
+    <div class="col-lg-8 col-lg-offset-2">
+      <div class="alert alert-success">
+        <p><strong>Package ID: </strong> {{package_id}}
+          <strong *ngIf="direction=='TRANSFER'">(<span class="glyphicon glyphicon-arrow-right"></span> Item delivery)</strong>
+          <strong *ngIf="direction=='RETURN'">(<span class="glyphicon glyphicon-arrow-left"></span> Item return)</strong></p>
+      </div>
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="alert alert-info">
+            <h4><strong>Origin</strong></h4>
+            <p><strong><span class="glyphicon glyphicon-link"></span> </strong>{{agreement_seller_data?.account_id}}</p>
+            <p><strong><span class="glyphicon glyphicon-user"></span> </strong>{{agreement_seller_data?.full_name}}</p>
+            <p><strong><span class="glyphicon glyphicon-globe"></span> </strong>{{agreement_seller_data?.street_address}},
+              {{agreement_seller_data?.postcode}} {{agreement_seller_data?.city}}</p>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="alert alert-info">
+            <h4><strong>Destination</strong></h4>
+            <p><strong><span class="glyphicon glyphicon-link"></span> </strong>{{agreement_buyer_data?.account_id}}</p>
+            <p><strong><span class="glyphicon glyphicon-user"></span> </strong>{{agreement_buyer_data?.full_name}}</p>
+            <p><strong><span class="glyphicon glyphicon-globe"></span> </strong>{{agreement_buyer_data?.street_address}},
+              {{agreement_buyer_data?.postcode}} {{agreement_buyer_data?.city}}</p>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="accelerometer_sensor_id !== null" class="alert alert-info">
+        <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Accelerometer</strong></h4>
+        <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{accelerometer_sensor_id}}
+          (<strong><span class="glyphicon glyphicon-arrow-up"></span> Threshold: </strong>{{agreement_logistics_data.accelerometer}} G)</p>
+      </div>
+      <div *ngIf="pressure_sensor_id !== null" class="alert alert-info">
+        <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Pressure sensor</strong></h4>
+        <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{pressure_sensor_id}}
+          (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.pressure_low}} PSI
+          <strong> <span class="glyphicon glyphicon-arrow-up"></span> Upper threshold: </strong>{{agreement_logistics_data?.pressure_high}} PSI)</p>
+      </div>
+      <div *ngIf="temperature_sensor_id !== null" class="alert alert-info">
+        <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Temperature sensor</strong></h4>
+        <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{temperature_sensor_id}}
+          (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.temperature_low}} &#8451;
+          <strong> <span class="glyphicon glyphicon-arrow-up"></span> Upper threshold: </strong>{{agreement_logistics_data?.temperature_high}} &#8451;)</p>
+      </div>
+      <div *ngIf="humidity_sensor_id !== null" class="alert alert-info">
+        <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Humidity sensor</strong></h4>
+        <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{humidity_sensor_id}}
+          (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.humidity_low}} %
+          <strong> <span class="glyphicon glyphicon-arrow-up"></span> Upper threshold: </strong>{{agreement_logistics_data?.humidity_high}} %)</p>
+      </div>
+      <div *ngIf="gps_sensor_id !== null" class="alert alert-info">
+        <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Global position sensor</strong></h4>
+        <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{gps_sensor_id}}</p>
+      </div>
+      <div class="alert alert-success">
+        <div class="input-group">
+          <input type="text" class="form-control" [(ngModel)]="package_weight" (ngModelChange)="updateLogisticsCost()" placeholder="Item weight">
+          <span class="input-group-btn"><button class="btn btn-default" type="button" disabled>kg</button></span>
+          <span class="input-group-btn" style="width:100px;"></span>
+          <input type="text" class="form-control" [(ngModel)]="logistics_cost" placeholder="Total price" disabled>
+          <span class="input-group-btn"><button class="btn btn-default" type="button" disabled>SEK</button></span>
+          <span class="input-group-btn" style="width:100px;"></span>
+          <span class="input-group-btn"><button class="btn btn-success" type="button" (click)="sendPackage()">Send</button></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="item_fetched == false">
+    <div class="col-lg-8 col-lg-offset-2">
+      <div class="alert alert-danger">
+        <p><strong><span class="glyphicon glyphicon-remove-circle"></span> This agreement is either not eligible for shipping or is not defined.</strong></p>
+      </div>
+    </div>
+  </div>
+</div>

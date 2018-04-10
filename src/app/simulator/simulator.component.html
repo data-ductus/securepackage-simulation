@@ -1,0 +1,83 @@
+<script src="../../../node_modules/chart.js/src/chart.js"></script>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <button class="btn btn-success" id="simStartButton"(click)="startSimulation()">Start simulation</button>
+    </div>
+  </div>
+</div>
+
+<div class="container sensor-dashboard">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="alert" [ngClass]="{'alert-success': gps_sensor_id !== null, 'alert-danger': gps_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Global position sensor </strong> {{gps_sensor_id}}</p>
+      </div>
+      <agm-map [latitude]="loc.lat" [longitude]="loc.lng">
+        <agm-direction *ngIf="direction" [origin]="direction.origin" [destination]="direction.destination"></agm-direction>
+      </agm-map>
+    </div>
+  </div>
+</div>
+
+<div class="container sensor-dashboard">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="alert" [ngClass]="{'alert-success': temperature_sensor_id !== null, 'alert-danger': temperature_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Temperature</strong> {{temperature_sensor_id}}</p>
+      </div>
+      <div *ngIf="temperature_sensor_id !== null" id="tempChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      <div *ngIf="temperature_sensor_id === null">No sensor included</div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert" [ngClass]="{'alert-success': accelerometer_sensor_id !== null, 'alert-danger': accelerometer_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Accelerometer</strong> {{accelerometer_sensor_id}}</p>
+      </div>
+      <div *ngIf="accelerometer_sensor_id !== null" id="accChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      <div *ngIf="accelerometer_sensor_id === null">No sensor included</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="alert" [ngClass]="{'alert-success': pressure_sensor_id !== null, 'alert-danger': pressure_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Pressure</strong> {{pressure_sensor_id}}</p>
+      </div>
+      <div *ngIf="pressure_sensor_id !== null" id="pressChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      <div *ngIf="pressure_sensor_id === null">No sensor included</div>
+    </div>
+    <div class="col-md-6">
+      <div class="alert" [ngClass]="{'alert-success': humidity_sensor_id !== null, 'alert-danger': humidity_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Humidity</strong> {{humidity_sensor_id}}</p>
+      </div>
+      <div *ngIf="humidity_sensor_id !== null" id="humidityChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      <div *ngIf="humidity_sensor_id === null">No sensor included</div>
+    </div>
+  </div>
+</div>
+
+<!-- Trigger the modal with a button -->
+<button id="openModalButton" [hidden]="true" data-toggle="modal" data-backdrop="static" data-target="#simcompleteModal">Open Modal</button>
+
+<!-- Modal -->
+<div id="simcompleteModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Simulation completed</h4>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <p><strong><span class="glyphicon glyphicon-globe"></span> Agreement identifier: </strong>{{global.globalvars.agreement_id}}</p>
+          <p><strong><span class="glyphicon glyphicon-time"></span> Time taken: </strong>{{time_taken}}</p>
+          <p *ngIf="violated == true"><strong><span class="glyphicon glyphicon-remove"></span> Terms were violated!</strong></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="exitSimulation()">End simulation</button>
+      </div>
+    </div>
+
+  </div>
+</div>

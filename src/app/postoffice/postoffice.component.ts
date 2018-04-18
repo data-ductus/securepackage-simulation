@@ -128,7 +128,7 @@ export class PostofficeComponent implements OnInit {
     this.logistics_cost = (this.package_weight * 59) + (this.sensor_count * 10);
   };
 
-  sendPackage = function () {
+  sendPackage = async function () {
     if (this.global.globalvars.current_simulation === 'DATABASE') {
       let request_payload = {
         kolli_id: this.package_id,
@@ -151,7 +151,12 @@ export class PostofficeComponent implements OnInit {
           }
         }));
     } else {
-      this.api.transportBlockchain(this.global.globalvars.agreement_id, this.randomCity());
+      const state = await this.api.getState(this.global.globalvars.agreement_id);
+      if (state == 2) {
+        this.api.transportBlockchain(this.global.globalvars.agreement_id, this.randomCity());
+      } else if (state == 5) {
+        this.api.transportReturnBlockchain(this.global.globalvars.agreement_id);
+      }
       this.router.navigate(['simulation']);
     }
   };

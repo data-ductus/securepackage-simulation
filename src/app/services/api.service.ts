@@ -87,6 +87,12 @@ export class ApiService {
     this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
   }
 
+  async transportReturnBlockchain(id) {
+    const gas = await this.contracts['agreementReturn'].methods.transportReturn(id).estimateGas({from: this.global.keys.logistics.public});
+    const abi = await this.contracts['agreementReturn'].methods.transportReturn(id).encodeABI();
+    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
+  }
+
   async sensorDataBlockchain(id, sensor, data) {
     const gas = await this.contracts['agreementDeliver'].methods.sensorData(id, sensor, data).estimateGas({from: this.global.keys[sensor].public});
     const abi = await this.contracts['agreementDeliver'].methods.sensorData(id, sensor, data).encodeABI();
@@ -96,6 +102,12 @@ export class ApiService {
   async deliverBlockchain(id) {
     const gas = await this.contracts['agreementDeliver'].methods.deliver(id).estimateGas({from: this.global.keys.logistics.public});
     const abi = await this.contracts['agreementDeliver'].methods.deliver(id).encodeABI();
+    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
+  }
+
+  async deliverReturnBlockchain(id) {
+    const gas = await this.contracts['agreementReturn'].methods.deliverReturn(id).estimateGas({from: this.global.keys.logistics.public});
+    const abi = await this.contracts['agreementReturn'].methods.deliverReturn(id).encodeABI();
     this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
   }
 

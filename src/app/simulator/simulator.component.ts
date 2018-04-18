@@ -105,8 +105,13 @@ export class SimulatorComponent implements OnInit {
         const delay = new Promise(resolve => setTimeout(resolve, 1000));
         await delay;
       }
-      this.origin = await this.api.getReturnAddress(this.global.globalvars.agreement_id);
-      this.destination = await this.api.getDeliveryAddress(this.global.globalvars.agreement_id);
+      if (state == 2) {
+        this.origin = await this.api.getReturnAddress(this.global.globalvars.agreement_id);
+        this.destination = await this.api.getDeliveryAddress(this.global.globalvars.agreement_id);
+      } else if (state == 5) {
+        this.destination = await this.api.getReturnAddress(this.global.globalvars.agreement_id);
+        this.origin = await this.api.getDeliveryAddress(this.global.globalvars.agreement_id);
+      }
     } else {
       this.api.serverRequest({id: this.global.globalvars.agreement_id}, "FETCH_AGREEMENT_INFO").then(data => {
         this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, current_status: data.state}, "CHECK_RETURN").then(data => {
@@ -299,6 +304,8 @@ export class SimulatorComponent implements OnInit {
       const state = await this.api.getState(this.global.globalvars.agreement_id);
       if (state == 2) {
         this.api.deliverBlockchain(this.global.globalvars.agreement_id);
+      } else if (state == 5) {
+        this.api.deliverReturnBlockchain(this.global.globalvars.agreement_id);
       }
     }
   };

@@ -17,5 +17,4 @@ export class AppComponent implements OnInit {
   changeSim = function (simulation) {
     this.global.globalvars.current_simulation = simulation;
   }
-
 }

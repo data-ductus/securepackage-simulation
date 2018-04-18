@@ -13,9 +13,9 @@ export class PostofficeComponent implements OnInit {
 
   item_fetched;
 
-  agreement_logistics_data;
-  agreement_seller_data;
-  agreement_buyer_data;
+  agreement_logistics_data = {};
+  agreement_seller_data = {};
+  agreement_buyer_data = {};
 
   package_id;
   direction;
@@ -30,9 +30,11 @@ export class PostofficeComponent implements OnInit {
   humidity_sensor_id = null;
   gps_sensor_id = null;
 
-  constructor(private global: GlobalsService, private api: ApiService, private generator: GeneratorService, private router: Router, private route: ActivatedRoute) { }
+  constructor(private global: GlobalsService, private api: ApiService, private generator: GeneratorService,
+              private router: Router, private route: ActivatedRoute) { }
 
   ngOnInit() {
+    this.global.getContracts();
     this.global.globalvars.current_simulation = "DATABASE";
     this.item_fetched;
     this.sensor_count = 0;
@@ -65,8 +67,39 @@ export class PostofficeComponent implements OnInit {
           this.item_fetched = false;
         }
       })
-    } else { }
+    } else {
+      this.fetchBlockchainData();
+    }
   };
+
+  async fetchBlockchainData() {
+    this.item_fetched = false;
+    const state = await this.api.getState(this.global.globalvars.agreement_id);
+    this.getSensorsBlockchain();
+    if (state == 1) {
+      this.agreement_buyer_data['city'] = await this.api.getDeliveryAddress(this.global.globalvars.agreement_id);
+      await this.api.setProviders(this.global.globalvars.agreement_id);
+      this.getSensorsBlockchain();
+      this.item_fetched = true;
+    } else if (state == 4) {
+      this.item_fetched = true;
+    }
+  }
+
+  async getSensorsBlockchain() {
+    const sensors = await this.api.getSensorsBlockchain(this.global.globalvars.agreement_id);
+    this.pressure_sensor_id = sensors['press']['set'] ? sensors['press']['provider']: null;
+    this.humidity_sensor_id = sensors['hum']['set'] ? sensors['hum']['provider']: null;
+    this.accelerometer_sensor_id = sensors['acc']['set'] ? sensors['acc']['provider']: null;
+    this.temperature_sensor_id = sensors['maxTemp']['set'] ? sensors['maxTemp']['provider']: null;
+    this.temperature_sensor_id = sensors['minTemp']['set'] ? sensors['minTemp']['provider']: this.temperature_sensor_id;
+
+    this.agreement_logistics_data['accelerometer'] = sensors['acc']['threshold'];
+    this.agreement_logistics_data['pressure_high'] = sensors['press']['threshold'];
+    this.agreement_logistics_data['humidity_high'] = sensors['hum']['threshold'];
+    this.agreement_logistics_data['temperature_high'] = sensors['maxTemp']['threshold'];
+    this.agreement_logistics_data['temperature_low'] = sensors['minTemp']['threshold'];
+  }
 
   generateSensors = function() {
     if (this.agreement_logistics_data.accelerometer !== null) {
@@ -117,7 +150,15 @@ export class PostofficeComponent implements OnInit {
             this.router.navigate(['simulation']);
           }
         }));
+    } else {
+      this.api.transportBlockchain(this.global.globalvars.agreement_id, this.randomCity());
+      this.router.navigate(['simulation']);
     }
   };
+
+  randomCity() {
+    const cities = ['Stockholm', 'Malmö', 'Göteborg', 'Uppsala', 'Sundsvall'];
+    return cities[Math.floor(Math.random()*5)]
+  }
 }
 

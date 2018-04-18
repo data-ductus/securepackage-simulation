@@ -30,7 +30,7 @@ export class SimulatorComponent implements OnInit {
 
   violated = false;
 
-  simulation_thresholds;
+  simulation_thresholds = {};
 
   direct;
   origin;
@@ -42,7 +42,7 @@ export class SimulatorComponent implements OnInit {
   pressData = [];
   humidityData = [];
 
-  stepDuration = 120;
+  stepDuration = 500;
 
   loc = {
     lat: 24.799448,
@@ -96,46 +96,77 @@ export class SimulatorComponent implements OnInit {
     } );
   }
 
-  initSimulation = function() {
-    this.api.serverRequest({id: this.global.globalvars.agreement_id}, "FETCH_AGREEMENT_INFO").then(data => {
-      this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, current_status: data.state}, "CHECK_RETURN").then(data => {
-        this.direct = data;
-        this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, direction: this.direct}, "FETCH_LOGISTICS_PARAMETERS").then(response => {
-          this.api.serverRequest({kolli_id: response.kolli_id}, "FETCH_SIMULATION_SENSORS").then(data => {
-            for (let sensor of data) {
-              if (sensor.sensor_type === 'ACC') {
-                this.accelerometer_sensor_id = sensor.sensor_id;
-              } else if (sensor.sensor_type === 'PRES') {
-                this.pressure_sensor_id = sensor.sensor_id;
-              } else if (sensor.sensor_type === 'TEMP') {
-                this.temperature_sensor_id = sensor.sensor_id;
-              } else if (sensor.sensor_type === 'HUMID') {
-                this.humidity_sensor_id = sensor.sensor_id;
-              } else if (sensor.sensor_type === 'GPS') {
-                this.gps_sensor_id = sensor.sensor_id;
+  initSimulation = async function() {
+    if (this.global.globalvars.current_simulation == 'BLOCKCHAIN') {
+      let state = 0;
+      while (state != 2 && state != 5) {
+        state = await this.fetchBlockchainData();
+        console.log(state);
+        const delay = new Promise(resolve => setTimeout(resolve, 1000));
+        await delay;
+      }
+      this.origin = await this.api.getReturnAddress(this.global.globalvars.agreement_id);
+      this.destination = await this.api.getDeliveryAddress(this.global.globalvars.agreement_id);
+    } else {
+      this.api.serverRequest({id: this.global.globalvars.agreement_id}, "FETCH_AGREEMENT_INFO").then(data => {
+        this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, current_status: data.state}, "CHECK_RETURN").then(data => {
+          this.direct = data;
+          this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, direction: this.direct}, "FETCH_LOGISTICS_PARAMETERS").then(response => {
+            this.api.serverRequest({kolli_id: response.kolli_id}, "FETCH_SIMULATION_SENSORS").then(data => {
+              for (let sensor of data) {
+                if (sensor.sensor_type === 'ACC') {
+                  this.accelerometer_sensor_id = sensor.sensor_id;
+                } else if (sensor.sensor_type === 'PRES') {
+                  this.pressure_sensor_id = sensor.sensor_id;
+                } else if (sensor.sensor_type === 'TEMP') {
+                  this.temperature_sensor_id = sensor.sensor_id;
+                } else if (sensor.sensor_type === 'HUMID') {
+                  this.humidity_sensor_id = sensor.sensor_id;
+                } else if (sensor.sensor_type === 'GPS') {
+                  this.gps_sensor_id = sensor.sensor_id;
+                }
               }
-            }
-          });
-          let request_payload = {agreement_id: this.global.globalvars.agreement_id, direction: this.direct, current_status: data.state};
-          this.api.serverRequest(request_payload, "FETCH_LOGISTICS_BUYER").then(data => {
-            this.destination = data.street_address + " " + data.city;
-            this.api.serverRequest(request_payload, "FETCH_LOGISTICS_SELLER").then(data => {
-              this.origin = data.street_address + " " + data.city;
-              this.directionUrl = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + this.origin + '&destination=' +
-                this.destination + '&key=AIzaSyCnD7Sr2wMskuqjxVGjP8EpDnd7Olf6fCg'.replace(/ /g,"+");
-              this.api.serverRequest(request_payload, "FETCH_SIMULATION_THRESHOLDS").then(data => {
-                this.simulation_thresholds = data;
-                this.initCharts();
-                this.getGeoCodeDirection();
+            });
+            let request_payload = {agreement_id: this.global.globalvars.agreement_id, direction: this.direct, current_status: data.state};
+            this.api.serverRequest(request_payload, "FETCH_LOGISTICS_BUYER").then(data => {
+              this.destination = data.street_address + " " + data.city;
+              this.api.serverRequest(request_payload, "FETCH_LOGISTICS_SELLER").then(data => {
+                this.origin = data.street_address + " " + data.city;
+                this.api.serverRequest(request_payload, "FETCH_SIMULATION_THRESHOLDS").then(data => {
+                  this.simulation_thresholds = data;
+                });
               });
             });
           });
         });
       });
-    });
-
-
+    }
+    this.directionUrl = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + this.origin + '&destination=' +
+      this.destination + '&key=AIzaSyCnD7Sr2wMskuqjxVGjP8EpDnd7Olf6fCg'.replace(/ /g,"+");
+    this.initCharts();
+    this.getGeoCodeDirection();
   };
+
+  async fetchBlockchainData() {
+    await this.getSensorsBlockchain();
+    return this.api.getState(this.global.globalvars.agreement_id)
+  }
+
+  async getSensorsBlockchain() {
+    const sensors = await this.api.getSensorsBlockchain(this.global.globalvars.agreement_id);
+    console.log('sensors ', sensors);
+    this.pressure_sensor_id = sensors['press']['set'] ? sensors['press']['provider']: null;
+    this.humidity_sensor_id = sensors['hum']['set'] ? sensors['hum']['provider']: null;
+    this.accelerometer_sensor_id = sensors['acc']['set'] ? sensors['acc']['provider']: null;
+    this.temperature_sensor_id = sensors['maxTemp']['set'] ? sensors['maxTemp']['provider']: null;
+    this.temperature_sensor_id = sensors['minTemp']['set'] ? sensors['minTemp']['provider']: this.temperature_sensor_id;
+
+    this.simulation_thresholds['accelerometer'] = sensors['acc']['threshold'];
+    this.simulation_thresholds['pressure_high'] = sensors['press']['threshold'];
+    this.simulation_thresholds['humidity_high'] = sensors['hum']['threshold'];
+    this.simulation_thresholds['temperature_high'] = sensors['maxTemp']['threshold'];
+    this.simulation_thresholds['temperature_low'] = sensors['minTemp']['threshold'];
+  }
 
   startSimulation = function () {
     //document.getElementById("simStartButton").disabled = true;
@@ -178,58 +209,98 @@ export class SimulatorComponent implements OnInit {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  generate = function (transportTime) {
+  generate = async function (transportTime) {
     if (this.temperature_sensor_id !== null) {
       const temp = this.transportService.temperatureSimulation(transportTime);
       this.amCharts.updateChart(this.tempChart, () => {
         this.tempChart.dataProvider.push(temp);
-        this.api.serverRequest({id: this.temperature_sensor_id, output: temp.temp.toFixed(2)}, "SENSOR_DATA").then(console.log("TEMP:" + temp.temp.toFixed(2)));
+        if (this.global.globalvars.current_simulation === 'DATABASE') {
+          this.api.serverRequest({id: this.temperature_sensor_id, output: temp.temp.toFixed(2)}, "SENSOR_DATA").then(console.log("TEMP:" + temp.temp.toFixed(2)));
+        }
       });
-      this.checkThresholds(temp.temp, this.simulation_thresholds.temperature_low, this.simulation_thresholds.temperature_high);
+      this.checkThresholds(temp.temp, this.simulation_thresholds.temperature_low, this.simulation_thresholds.temperature_high, 'maxTemp');
     }
     if (this.accelerometer_sensor_id !== null) {
       const acc = this.transportService.accelerationSimulation(transportTime);
       this.amCharts.updateChart(this.accChart, () => {
         this.accChart.dataProvider.push(acc);
-        this.api.serverRequest({id: this.accelerometer_sensor_id, output: acc.acc.toFixed(2)}, "SENSOR_DATA").then(console.log("ACC:" + acc.acc.toFixed(2)));
+        if (this.global.globalvars.current_simulation === 'DATABASE') {
+          this.api.serverRequest({
+            id: this.accelerometer_sensor_id,
+            output: acc.acc.toFixed(2)
+          }, "SENSOR_DATA").then(console.log("ACC:" + acc.acc.toFixed(2)));
+        }
       });
-      this.checkThresholds(acc.acc, - this.simulation_thresholds.accelerometer, this.simulation_thresholds.accelerometer);
+      this.checkThresholds(acc.acc, - this.simulation_thresholds.accelerometer, this.simulation_thresholds.accelerometer, 'acceleration');
     }
     if (this.humidity_sensor_id !== null) {
       const humid = this.transportService.humiditySimulation(transportTime);
       this.amCharts.updateChart(this.humidityChart, () => {
         this.humidityChart.dataProvider.push(humid);
-        this.api.serverRequest({id: this.humidity_sensor_id, output: humid.humidity.toFixed(2)}, "SENSOR_DATA").then(console.log("HUMID:" + humid.humidity.toFixed(2)));
+        if (this.global.globalvars.current_simulation === 'DATABASE') {
+          this.api.serverRequest({
+            id: this.humidity_sensor_id,
+            output: humid.humidity.toFixed(2)
+          }, "SENSOR_DATA").then(console.log("HUMID:" + humid.humidity.toFixed(2)));
+        }
       });
-      this.checkThresholds(humid.humidity, this.simulation_thresholds.humidity_low, this.simulation_thresholds.humidity_high);
+      this.checkThresholds(humid.humidity, this.simulation_thresholds.humidity_low, this.simulation_thresholds.humidity_high, 'humidity');
     }
     if (this.pressure_sensor_id !== null) {
       const pressure = this.transportService.pressureSimulation(transportTime);
       this.amCharts.updateChart(this.pressChart, () => {
         this.pressChart.dataProvider.push(pressure);
-        this.api.serverRequest({id: this.pressure_sensor_id, output: pressure.press.toFixed(2)}, "SENSOR_DATA").then(console.log("PRES:" + pressure.press.toFixed(2)));
+        if (this.global.globalvars.current_simulation === 'DATABASE') {
+          this.api.serverRequest({
+            id: this.pressure_sensor_id,
+            output: pressure.press.toFixed(2)
+          }, "SENSOR_DATA").then(console.log("PRES:" + pressure.press.toFixed(2)));
+        }
       });
-      this.checkThresholds(pressure.press, this.simulation_thresholds.pressure_low, this.simulation_thresholds.pressure_high);
+      this.checkThresholds(pressure.press, this.simulation_thresholds.pressure_low, this.simulation_thresholds.pressure_high, 'pressure');
     }
     if (this.gps_sensor_id !== null) {
-      this.api.serverRequest({gps_id: this.gps_sensor_id, lat: this.direction.origin.lat, lng: this.direction.origin.lng}, "SENSOR_DATA").then();
+      if (this.global.globalvars.current_simulation === 'DATABASE') {
+        this.api.serverRequest({gps_id: this.gps_sensor_id, lat: this.direction.origin.lat, lng: this.direction.origin.lng}, "SENSOR_DATA").then();
+      }
     }
   };
 
-  checkThresholds = function(data, low, high) {
-    if (data > high || data < low) {
+  checkThresholds = async function(data, low, high, sensor) {
+    if (this.global.globalvars.current_simulation === 'BLOCKCHAIN') {
+      if (sensor === 'maxTemp') {
+        if (this.api.minTemp['set'] && data < low && !this.api['minTemp']['warning']) {
+          console.log('minTemp', data, low, this.api['minTemp']['warning']);
+          await this.api.sensorDataBlockchain(this.global.globalvars.agreement_id, 'minTemp', Math.floor(data));
+          this.getSensorsBlockchain();
+        }
+      }
+      if (this.api[sensor]['set'] && data > high && !this.api[sensor]['warning']) {
+        console.log(sensor, data, high, this.api['minTemp']['warning']);
+        await this.api.sensorDataBlockchain(this.global.globalvars.agreement_id, sensor, Math.ceil(data));
+        this.getSensorsBlockchain();
+      }
+    }
+    if ((data > high || data < low) && this.global.globalvars.current_simulation === 'DATABASE') {
       this.violated = true;
       this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id}, "VIOLATE").then();
     }
   };
 
-  endSimulation = function () {
-    let state = 'DELIVERED';
-    if (this.direct == 'RETURN') {
-      state = 'RETURNED';
+  endSimulation = async function () {
+    if (this.global.globalvars.current_simulation == 'DATABASE') {
+      let state = 'DELIVERED';
+      if (this.direct == 'RETURN') {
+        state = 'RETURNED';
+      }
+      this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, state: state}, "ALTER_STATE")
+        .then(function() {document.getElementById("openModalButton").click()});
+    } else {
+      const state = await this.api.getState(this.global.globalvars.agreement_id);
+      if (state == 2) {
+        this.api.deliverBlockchain(this.global.globalvars.agreement_id);
+      }
     }
-    this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, state: state}, "ALTER_STATE")
-      .then(function() {document.getElementById("openModalButton").click()});
   };
 
   exitSimulation = function () {

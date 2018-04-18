@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule} from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { TransportService} from './services/transport.service';
+import { Web3Service } from "./services/web3.service";
 
 import { AppComponent } from './app.component';
 import { SimulatorComponent } from './simulator/simulator.component';
@@ -38,7 +39,7 @@ const appRoutes: Routes = [
     AmChartsModule,
     FormsModule
   ],
-  providers: [TransportService, ApiService, GlobalsService, GeneratorService],
+  providers: [TransportService, ApiService, GlobalsService, GeneratorService, Web3Service],
   bootstrap: [AppComponent]
 })
 

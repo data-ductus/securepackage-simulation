@@ -42,7 +42,7 @@ export class SimulatorComponent implements OnInit {
   pressData = [];
   humidityData = [];
 
-  stepDuration = 500;
+  stepDuration = 60;
 
   loc = {
     lat: 24.799448,
@@ -112,6 +112,10 @@ export class SimulatorComponent implements OnInit {
         this.destination = await this.api.getReturnAddress(this.global.globalvars.agreement_id);
         this.origin = await this.api.getDeliveryAddress(this.global.globalvars.agreement_id);
       }
+      this.directionUrl = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + this.origin + '&destination=' +
+        this.destination + '&key=AIzaSyCnD7Sr2wMskuqjxVGjP8EpDnd7Olf6fCg'.replace(/ /g,"+");
+      this.initCharts();
+      this.getGeoCodeDirection();
     } else {
       this.api.serverRequest({id: this.global.globalvars.agreement_id}, "FETCH_AGREEMENT_INFO").then(data => {
         this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, current_status: data.state}, "CHECK_RETURN").then(data => {
@@ -139,6 +143,10 @@ export class SimulatorComponent implements OnInit {
                 this.origin = data.street_address + " " + data.city;
                 this.api.serverRequest(request_payload, "FETCH_SIMULATION_THRESHOLDS").then(data => {
                   this.simulation_thresholds = data;
+                  this.directionUrl = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + this.origin + '&destination=' +
+                    this.destination + '&key=AIzaSyCnD7Sr2wMskuqjxVGjP8EpDnd7Olf6fCg'.replace(/ /g,"+");
+                  this.initCharts();
+                  this.getGeoCodeDirection();
                 });
               });
             });
@@ -146,10 +154,6 @@ export class SimulatorComponent implements OnInit {
         });
       });
     }
-    this.directionUrl = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + this.origin + '&destination=' +
-      this.destination + '&key=AIzaSyCnD7Sr2wMskuqjxVGjP8EpDnd7Olf6fCg'.replace(/ /g,"+");
-    this.initCharts();
-    this.getGeoCodeDirection();
   };
 
   async fetchBlockchainData() {
@@ -287,8 +291,10 @@ export class SimulatorComponent implements OnInit {
       }
     }
     if ((data > high || data < low) && this.global.globalvars.current_simulation === 'DATABASE') {
-      this.violated = true;
-      this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id}, "VIOLATE").then();
+      if (this.violated == false) {
+        this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id}, "VIOLATE").then();
+        this.violated = true;
+      }
     }
   };
 

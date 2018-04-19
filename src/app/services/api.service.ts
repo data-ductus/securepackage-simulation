@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient} from '@angular/common/http';
 import { Web3Service } from "./web3.service";
 import {GlobalsService} from "./globals.service";
+import {GeneratorService} from './generator.service';
 
 @Injectable()
 export class ApiService {
@@ -17,12 +18,13 @@ export class ApiService {
 
   contracts = this.global.contracts;
 
-  constructor(private http: HttpClient, private web3Service: Web3Service, private global: GlobalsService) {
+  constructor(private http: HttpClient, private web3Service: Web3Service, private global: GlobalsService, private generator: GeneratorService) {
     this.watchAccount()
   }
 
   serverRequest = function (payload, action) {
     payload.action = action;
+    payload.event_timestamp = this.generator.generateCurrentTime();
     let promise = new Promise((resolve) => {
       this.http.post(this.servertarget, payload).subscribe(data => {
         console.log(data);

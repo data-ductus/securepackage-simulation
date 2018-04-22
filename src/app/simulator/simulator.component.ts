@@ -42,7 +42,7 @@ export class SimulatorComponent implements OnInit {
   pressData = [];
   humidityData = [];
 
-  stepDuration = 60;
+  stepDuration = 120;
 
   loc = {
     lat: 24.799448,

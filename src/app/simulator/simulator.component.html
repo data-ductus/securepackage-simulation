@@ -22,35 +22,68 @@
 
 <div class="container sensor-dashboard">
   <div class="row">
+
+    <!--Temperature-->
     <div class="col-md-6">
-      <div class="alert" [ngClass]="{'alert-success': temperature_sensor_id !== null, 'alert-danger': temperature_sensor_id === null}">
-        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Temperature</strong> {{temperature_sensor_id}}</p>
+      <div class="alert sensor-header" [ngClass]="{'alert-success': temperature_sensor_id !== null, 'alert-danger': temperature_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Temperature</strong> <strong *ngIf="temperature_sensor_id === null">(not included)</strong> {{temperature_sensor_id}}</p>
       </div>
-      <div *ngIf="temperature_sensor_id !== null" id="tempChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
-      <div *ngIf="temperature_sensor_id === null">No sensor included</div>
+      <div class="alert sensor-chart" *ngIf="temperature_sensor_id !== null">
+        <div id="tempChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      </div>
     </div>
+
+    <!--Accelerometer-->
     <div class="col-md-6">
-      <div class="alert" [ngClass]="{'alert-success': accelerometer_sensor_id !== null, 'alert-danger': accelerometer_sensor_id === null}">
-        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Accelerometer</strong> {{accelerometer_sensor_id}}</p>
+      <div class="alert sensor-header" [ngClass]="{'alert-success': accelerometer_sensor_id !== null, 'alert-danger': accelerometer_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Accelerometer</strong> <strong *ngIf="accelerometer_sensor_id === null">(not included)</strong> {{accelerometer_sensor_id}}</p>
       </div>
-      <div *ngIf="accelerometer_sensor_id !== null" id="accChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
-      <div *ngIf="accelerometer_sensor_id === null">No sensor included</div>
+      <div class="alert sensor-chart" *ngIf="accelerometer_sensor_id !== null">
+        <div id="accChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      </div>
     </div>
   </div>
+
+  <!--Pressure sensor-->
   <div class="row">
     <div class="col-md-6">
-      <div class="alert" [ngClass]="{'alert-success': pressure_sensor_id !== null, 'alert-danger': pressure_sensor_id === null}">
-        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Pressure</strong> {{pressure_sensor_id}}</p>
+      <div class="alert sensor-header" [ngClass]="{'alert-success': pressure_sensor_id !== null, 'alert-danger': pressure_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Pressure</strong> <strong *ngIf="pressure_sensor_id === null">(not included)</strong> {{pressure_sensor_id}}</p>
       </div>
-      <div *ngIf="pressure_sensor_id !== null" id="pressChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
-      <div *ngIf="pressure_sensor_id === null">No sensor included</div>
+      <div class="alert sensor-chart" *ngIf="pressure_sensor_id !== null">
+        <div id="pressChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      </div>
     </div>
+
+    <!--Humidity sensor-->
     <div class="col-md-6">
-      <div class="alert" [ngClass]="{'alert-success': humidity_sensor_id !== null, 'alert-danger': humidity_sensor_id === null}">
-        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Humidity</strong> {{humidity_sensor_id}}</p>
+      <div class="alert sensor-header" [ngClass]="{'alert-success': humidity_sensor_id !== null, 'alert-danger': humidity_sensor_id === null}">
+        <p><strong><span class="glyphicon glyphicon-dashboard"></span> Humidity</strong> <strong *ngIf="humidity_sensor_id === null">(not included)</strong> {{humidity_sensor_id}}</p>
       </div>
-      <div *ngIf="humidity_sensor_id !== null" id="humidityChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
-      <div *ngIf="humidity_sensor_id === null">No sensor included</div>
+      <div class="alert sensor-chart" *ngIf="humidity_sensor_id !== null">
+        <div id="humidityChartDiv" [style.width.%]="100" [style.height.px]="400"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--GPS display buttons-->
+<div class="row">
+  <div class="col-lg-12 form-group">
+    <button *ngIf="show_gps == false" class="btn btn-success form-control" (click)="show_gps = true"><span class="glyphicon glyphicon-globe"></span> Show GPS location</button>
+    <button *ngIf="show_gps == true" class="btn btn-danger form-control" (click)="show_gps = false"><span class="glyphicon glyphicon-globe"></span> Hide GPS location</button>
+  </div>
+</div>
+
+<!--Map display-->
+<div *ngIf="show_gps == true">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="alert">
+        <agm-map [latitude]="current_location.lat" [longitude]="current_location.lng" [zoom]="10">
+          <agm-marker [latitude]="current_location.lat" [longitude]="current_location.lng"></agm-marker>
+        </agm-map>
+      </div>
     </div>
   </div>
 </div>

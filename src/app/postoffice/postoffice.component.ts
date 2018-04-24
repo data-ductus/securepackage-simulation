@@ -36,7 +36,6 @@ export class PostofficeComponent implements OnInit {
   ngOnInit() {
     this.global.getContracts();
     this.global.globalvars.current_simulation = "DATABASE";
-    this.item_fetched;
     this.sensor_count = 0;
     this.logistics_cost = 0;
     this.package_weight = 0;
@@ -67,7 +66,7 @@ export class PostofficeComponent implements OnInit {
           this.item_fetched = false;
         }
       })
-    } else {
+    } else if (this.global.globalvars.current_simulation === 'BLOCKCHAIN') {
       this.fetchBlockchainData();
     }
   };
@@ -150,7 +149,7 @@ export class PostofficeComponent implements OnInit {
             this.router.navigate(['simulation']);
           }
         }));
-    } else {
+    } else if (this.global.globalvars.current_simulation === 'BLOCKCHAIN') {
       const state = await this.api.getState(this.global.globalvars.agreement_id);
       if (state == 2) {
         this.api.transportBlockchain(this.global.globalvars.agreement_id, this.randomCity());

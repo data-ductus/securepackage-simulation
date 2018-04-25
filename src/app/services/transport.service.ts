@@ -1,40 +1,36 @@
 import { Injectable } from '@angular/core';
 
+/* TransportService: handles simulation of next step */
+
 @Injectable()
+
 export class TransportService {
 
+  //Initial values
   stdTemp = 20;
   currTemp = 20;
   pressure = 1;
   humidity = 20;
 
-  /*maxTemp;
-  maxTempViolation = false;
-  minTemp;
-  minTempViolation = false;
-
-  accelerometer;
-  accelerometerViolation = false;
-
-  minHumidity;
-  minHumidityViolation = false;
-  maxHumidity;
-  maxHumidityViolation = false;
-
-  minPressure;
-  minPressureViolation = false;
-  maxPressure;
-  maxPressureViolation = false;
-
-  gpsInclusion;*/
-
   constructor() { }
 
+  /**
+   * Generates temperature for next step.
+   *
+   * @param i Current time.
+   * @returns JSON array, composed out of time and temperature.
+   */
   temperatureSimulation = function (i) {
     this.currTemp = this.currTemp + Math.random() - 0.5;
     return {'temp': this.currTemp, 'time': i};
   };
 
+  /**
+   * Generates acceleration for next step.
+   *
+   * @param i Current time.
+   * @returns JSON array, composed out of time and acceleration.
+   */
   accelerationSimulation = function (i) {
     let acc = 0;
     if (Math.floor(Math.random() * 15) === 0) {
@@ -45,6 +41,12 @@ export class TransportService {
     return {'acc': acc, 'time': i};
   };
 
+  /**
+   * Generates pressure for next step.
+   *
+   * @param i Current time.
+   * @returns JSON array, composed out of time and pressure.
+   */
   pressureSimulation = function (i) {
     if (Math.floor(Math.random() * 20) === 0) {
       this.pressure = Math.random() * 100000;
@@ -54,6 +56,12 @@ export class TransportService {
     return {'press': this.pressure, 'time': i};
   };
 
+  /**
+   * Generates humidity for next step.
+   *
+   * @param i Current time.
+   * @returns JSON array, composed out of time and humidity.
+   */
   humiditySimulation = function (i) {
     if (Math.floor(Math.random() * 20) === 0) {
       this.humidity = Math.random() * 100;

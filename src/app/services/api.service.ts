@@ -4,12 +4,18 @@ import { Web3Service } from "./web3.service";
 import {GlobalsService} from "./globals.service";
 import {GeneratorService} from './generator.service';
 
+/* ApiService: Handles API communication */
+
 @Injectable()
 export class ApiService {
 
+  //API server target
   servertarget = 'http://localhost/securepackage_api/api_main.php';
+
+
   account;
 
+  //Thresholds (for blockchain version)
   maxTemp;
   minTemp;
   acceleration;
@@ -22,12 +28,18 @@ export class ApiService {
     this.watchAccount()
   }
 
+  /**
+   * Performs a server call, sends and retrieves JSON arrays.
+   *
+   * @param payload HTTP request payload.
+   * @param action HTTP server action.
+   * @returns {Promise<any>} HTTP server response.
+   */
   serverRequest = function (payload, action) {
     payload.action = action;
     payload.event_timestamp = this.generator.generateCurrentTime();
     let promise = new Promise((resolve) => {
       this.http.post(this.servertarget, payload).subscribe(data => {
-        console.log(data);
         resolve(data);})
     });
     return promise;

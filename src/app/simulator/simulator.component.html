@@ -1,4 +1,8 @@
+<!--SimulatorComponent: handles simulation of logistics process-->
+
 <script src="../../../node_modules/chart.js/src/chart.js"></script>
+
+<!--Start simulation-->
 <div class="container">
   <div class="row">
     <div class="col-md-12">
@@ -7,6 +11,7 @@
   </div>
 </div>
 
+<!--GPS sensor map-->
 <div class="container sensor-dashboard">
   <div class="row">
     <div class="col-md-12">
@@ -23,7 +28,7 @@
 <div class="container sensor-dashboard">
   <div class="row">
 
-    <!--Temperature-->
+    <!--Temperature sensor-->
     <div class="col-md-6">
       <div class="alert sensor-header" [ngClass]="{'alert-success': temperature_sensor_id !== null, 'alert-danger': temperature_sensor_id === null}">
         <p><strong><span class="glyphicon glyphicon-dashboard"></span> Temperature</strong> <strong *ngIf="temperature_sensor_id === null">(not included)</strong> {{temperature_sensor_id}}</p>

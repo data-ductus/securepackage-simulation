@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import {Web3Service} from "./web3.service";
 
+/* GlobalsService: handles global variables */
+
 @Injectable()
+
 export class GlobalsService {
 
   agreementDeliverJson = require('../../../build/contracts/purchase.json');

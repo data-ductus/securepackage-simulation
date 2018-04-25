@@ -4,19 +4,20 @@ import {ApiService} from '../services/api.service';
 import {GeneratorService} from '../services/generator.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
-@Component({
-  selector: 'app-postoffice',
-  templateUrl: './postoffice.component.html',
-  styleUrls: ['./postoffice.component.css']
-})
+/* PostofficeComponent: handles initiation of simulation- */
+@Component({selector: 'app-postoffice', templateUrl: './postoffice.component.html', styleUrls: ['./postoffice.component.css']})
+
 export class PostofficeComponent implements OnInit {
 
+  //Indicates whether the item has been retrieved from the server
   item_fetched;
 
+  //Agreement parameters
   agreement_logistics_data = {};
   agreement_seller_data = {};
   agreement_buyer_data = {};
 
+  //Additional logistics parameters
   package_id;
   direction;
 
@@ -24,6 +25,7 @@ export class PostofficeComponent implements OnInit {
   sensor_count : number;
   logistics_cost : number;
 
+  //Sensor inclusion
   accelerometer_sensor_id = null;
   pressure_sensor_id = null;
   temperature_sensor_id = null;
@@ -42,6 +44,9 @@ export class PostofficeComponent implements OnInit {
     this.package_id = this.generator.generatePackageID();
   }
 
+  /**
+   * Fetches agreement data for logistics.
+   */
   fetchAgreementData = function () {
     if (this.global.globalvars.current_simulation === 'DATABASE') {
       let request_payload = {agreement_id: this.global.globalvars.agreement_id, current_status: "LOCKED"};
@@ -70,6 +75,7 @@ export class PostofficeComponent implements OnInit {
       this.fetchBlockchainData();
     }
   };
+
 
   async fetchBlockchainData() {
     this.item_fetched = false;
@@ -100,6 +106,9 @@ export class PostofficeComponent implements OnInit {
     this.agreement_logistics_data['temperature_low'] = sensors['minTemp']['threshold'];
   }
 
+  /**
+   * Generates sensors and IDs.
+   */
   generateSensors = function() {
     if (this.agreement_logistics_data.accelerometer !== null) {
       this.accelerometer_sensor_id = this.generator.generate160bitId();
@@ -123,10 +132,18 @@ export class PostofficeComponent implements OnInit {
     }
   };
 
+  /**
+   * Updates cost of logistics
+   */
   updateLogisticsCost = function () {
     this.logistics_cost = (this.package_weight * 59) + (this.sensor_count * 10);
   };
 
+  /**
+   * Sends package, navigates to SimulatorComponent.
+   *
+   * @returns {Promise<void>} Promise.
+   */
   sendPackage = async function () {
     if (this.global.globalvars.current_simulation === 'DATABASE') {
       let request_payload = {
@@ -160,7 +177,12 @@ export class PostofficeComponent implements OnInit {
     }
   };
 
-  randomCity() {
+  /**
+   * Returns a random city for transport.
+   *
+   * @returns {string} City.
+   */
+  randomCity = function() {
     const cities = ['Stockholm', 'Malmö', 'Göteborg', 'Uppsala', 'Sundsvall'];
     return cities[Math.floor(Math.random()*5)]
   }

@@ -6,49 +6,55 @@ import {ApiService} from '../services/api.service';
 import {GlobalsService} from '../services/globals.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
-@Component({
-  selector: 'app-simulator',
-  templateUrl: './simulator.component.html',
-  styleUrls: ['./simulator.component.css']
-})
+/* SimulatorComponent: handles simulation of logistics process */
+@Component({selector: 'app-simulator', templateUrl: './simulator.component.html', styleUrls: ['./simulator.component.css']})
+
 export class SimulatorComponent implements OnInit {
 
+  //Geographic transport parameters
   direction;
   waypoints;
   time_taken;
 
+  //Sensor charts
   private tempChart: AmChart;
   private pressChart: AmChart;
   private accChart: AmChart;
   private humidityChart: AmChart;
 
+  //Sensor inclusion
   accelerometer_sensor_id = null;
   pressure_sensor_id = null;
   temperature_sensor_id = null;
   humidity_sensor_id = null;
   gps_sensor_id = null;
 
+  //Sets to true if logistics terms have been violated
   violated = false;
 
-  simulation_thresholds = {};
+  //Sensor thresholds
+  simulation_thresholds;
 
+  //Directions
   direct;
   origin;
   destination;
 
+  //Sensor chart data
   time = [];
   tempData = [];
   accData = [];
   pressData = [];
   humidityData = [];
 
+  //Duration of a single step in seconds
   stepDuration = 120;
 
-  loc = {
-    lat: 24.799448,
-    lng: 120.979021,
-  };
+  //For map initialization
+  loc = {lat: null, lng: null};
 
+
+  //API access URL
   directionUrl = '';
 
   constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient, private amCharts: AmChartsService, private transportService: TransportService, private api: ApiService, private global: GlobalsService) { }
@@ -57,6 +63,9 @@ export class SimulatorComponent implements OnInit {
     this.initSimulation();
   }
 
+  /**
+   * Initializes charts, sets data sources.
+   */
   private initCharts() {
     this.tempChart = this.amCharts.makeChart( 'tempChartDiv', {
       'type': 'serial',
@@ -96,6 +105,11 @@ export class SimulatorComponent implements OnInit {
     } );
   }
 
+  /**
+   * Initializes simulation.
+   *
+   * @returns {Promise<void>} Promise.
+   */
   initSimulation = async function() {
     if (this.global.globalvars.current_simulation == 'BLOCKCHAIN') {
       let state = 0;
@@ -116,11 +130,14 @@ export class SimulatorComponent implements OnInit {
         this.destination + '&key=AIzaSyCnD7Sr2wMskuqjxVGjP8EpDnd7Olf6fCg'.replace(/ /g,"+");
       this.initCharts();
       this.getGeoCodeDirection();
-    } else {
+    }
+    else if(this.global.globalvars.current_simulation == 'DATABASE') {
+      //Fetch general logistics parameters
       this.api.serverRequest({id: this.global.globalvars.agreement_id}, "FETCH_AGREEMENT_INFO").then(data => {
         this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, current_status: data.state}, "CHECK_RETURN").then(data => {
           this.direct = data;
           this.api.serverRequest({agreement_id: this.global.globalvars.agreement_id, direction: this.direct}, "FETCH_LOGISTICS_PARAMETERS").then(response => {
+            //Fetch and set sensors
             this.api.serverRequest({kolli_id: response.kolli_id}, "FETCH_SIMULATION_SENSORS").then(data => {
               for (let sensor of data) {
                 if (sensor.sensor_type === 'ACC') {
@@ -136,6 +153,7 @@ export class SimulatorComponent implements OnInit {
                 }
               }
             });
+            //Fetch directions, according to the way parcel travels (return, or delivery)
             let request_payload = {agreement_id: this.global.globalvars.agreement_id, direction: this.direct, current_status: data.state};
             this.api.serverRequest(request_payload, "FETCH_LOGISTICS_BUYER").then(data => {
               this.destination = data.street_address + " " + data.city;
@@ -156,11 +174,21 @@ export class SimulatorComponent implements OnInit {
     }
   };
 
+  /**
+   * Fetches blockchain data.
+   *
+   * @returns {Promise<any>} Promise.
+   */
   async fetchBlockchainData() {
     await this.getSensorsBlockchain();
     return this.api.getState(this.global.globalvars.agreement_id)
   }
 
+  /**
+   * Fetches blockchain sensors.
+   *
+   * @returns {Promise<void>} Promise.
+   */
   async getSensorsBlockchain() {
     const sensors = await this.api.getSensorsBlockchain(this.global.globalvars.agreement_id);
     console.log('sensors ', sensors);
@@ -177,11 +205,16 @@ export class SimulatorComponent implements OnInit {
     this.simulation_thresholds['temperature_low'] = sensors['minTemp']['threshold'];
   }
 
+  /**
+   * Starts a simulation by performing first step.
+   */
   startSimulation = function () {
-    //document.getElementById("simStartButton").disabled = true;
     this.step();
   };
 
+  /**
+   * Fetches directions from Google Directions API.
+   */
   getGeoCodeDirection = function () {
     this.http.get(this.directionUrl)
       .subscribe(data => {
@@ -193,6 +226,10 @@ export class SimulatorComponent implements OnInit {
       });
   };
 
+  /**
+   * Runs simulation by calling itself, until parcel arrives.
+   * @returns {Promise<void>}
+   */
   async step() {
     let stepNumber = 0;
     let transportTime = 0;
@@ -214,10 +251,22 @@ export class SimulatorComponent implements OnInit {
     this.endSimulation();
   }
 
+  /**
+   * Halt the application.
+   *
+   * @param {number} ms Number of milliseconds.
+   * @returns {Promise<any>} Promise.
+   */
   delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  /**
+   * Generate parameters for a step.
+   *
+   * @param transportTime Current transport time.
+   * @returns {Promise<void>} Promise.
+   */
   generate = async function (transportTime) {
     if (this.temperature_sensor_id !== null) {
       const temp = this.transportService.temperatureSimulation(transportTime);
@@ -275,6 +324,15 @@ export class SimulatorComponent implements OnInit {
     }
   };
 
+  /**
+   * Checks if the threshold is violated.
+   *
+   * @param data Generated data.
+   * @param low Lower threshold limit.
+   * @param high Upper threshold limit.
+   * @param sensor Current sensor.
+   * @returns {Promise<void>} Promise.
+   */
   checkThresholds = async function(data, low, high, sensor) {
     if (this.global.globalvars.current_simulation === 'BLOCKCHAIN') {
       if (sensor === 'maxTemp') {
@@ -298,6 +356,11 @@ export class SimulatorComponent implements OnInit {
     }
   };
 
+  /**
+   * Ends a simulation.
+   *
+   * @returns {Promise<void>} Promise.
+   */
   endSimulation = async function () {
     if (this.global.globalvars.current_simulation == 'DATABASE') {
       let state = 'DELIVERED';
@@ -316,6 +379,9 @@ export class SimulatorComponent implements OnInit {
     }
   };
 
+  /**
+   * Exits simulation by navigating to PostofficeComponent.
+   */
   exitSimulation = function () {
     this.router.navigate(['']);
   }

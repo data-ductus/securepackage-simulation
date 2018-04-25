@@ -1,6 +1,10 @@
+<!--PostofficeComponent: handles initiation of simulation-->
+
 <div class="container-fluid" xmlns="http://www.w3.org/1999/html">
   <div class="row">
     <div class="col-lg-8 col-lg-offset-2">
+
+      <!--Agreement search-->
       <div class="alert alert-info">
         <div class="form-group">
           <h4><strong><span class="glyphicon glyphicon-random"></span> Transport parcel</strong></h4>
@@ -12,13 +16,18 @@
       </div>
     </div>
   </div>
+
+  <!--Logistics information display-->
   <div class="row" *ngIf="item_fetched">
     <div class="col-lg-8 col-lg-offset-2">
+      <!--Package ID and direction-->
       <div class="alert alert-success">
         <p><strong>Package ID: </strong> {{package_id}}
           <strong *ngIf="direction=='TRANSFER'">(<span class="glyphicon glyphicon-arrow-right"></span> Item delivery)</strong>
           <strong *ngIf="direction=='RETURN'">(<span class="glyphicon glyphicon-arrow-left"></span> Item return)</strong></p>
       </div>
+
+      <!--Actor information-->
       <div class="row">
         <div class="col-lg-6">
           <div class="alert alert-info">
@@ -39,11 +48,15 @@
           </div>
         </div>
       </div>
+
+      <!--Accelerometer-->
       <div *ngIf="accelerometer_sensor_id !== null || (global.globalvars.current_simulation == 'BLOCKCHAIN' && agreement_logistics_data['sensors']['acc']['set'])" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Accelerometer</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{accelerometer_sensor_id}}
           (<strong><span class="glyphicon glyphicon-arrow-up"></span> Threshold: </strong>{{agreement_logistics_data.accelerometer}} G)</p>
       </div>
+
+      <!--Pressure sensor-->
       <div *ngIf="pressure_sensor_id !== null || (global.globalvars.current_simulation == 'BLOCKCHAIN' && agreement_logistics_data['sensors']['press']['set'])" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Pressure sensor</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{pressure_sensor_id}}
@@ -56,16 +69,22 @@
           (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.temperature_low}} &#8451;
           <strong> <span class="glyphicon glyphicon-arrow-up"></span> Upper threshold: </strong>{{agreement_logistics_data?.temperature_high}} &#8451;)</p>
       </div>
+
+      <!--Humidity sensor-->
       <div *ngIf="humidity_sensor_id !== null" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Humidity sensor</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{humidity_sensor_id}}
           (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.humidity_low}} %
           <strong> <span class="glyphicon glyphicon-arrow-up"></span> Upper threshold: </strong>{{agreement_logistics_data?.humidity_high}} %)</p>
       </div>
+
+      <!--GPS sensor-->
       <div *ngIf="gps_sensor_id !== null" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Global position sensor</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{gps_sensor_id}}</p>
       </div>
+
+      <!--Logistics price and weight parameters-->
       <div class="alert alert-success">
         <div class="input-group">
           <input type="text" class="form-control" [(ngModel)]="package_weight" (ngModelChange)="updateLogisticsCost()" placeholder="Item weight">
@@ -79,6 +98,8 @@
       </div>
     </div>
   </div>
+
+  <!--If agreement is not valid-->
   <div class="row" *ngIf="item_fetched == false">
     <div class="col-lg-8 col-lg-offset-2">
       <div class="alert alert-danger">

@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import {Web3Service} from "./web3.service";
 
+/* GlobalsService: handles global variables */
+
 @Injectable()
+
 export class GlobalsService {
 
   agreementDeliverJson = require('../../../build/contracts/purchase.json');
@@ -12,7 +15,7 @@ export class GlobalsService {
   globalvars = {
     current_simulation: "DATABASE",
     simulation_running: false,
-    agreement_id: "c7ae297b8826611310dd9d461d969426788d4fd4",
+    agreement_id: "dec1cb540229da9827e0560b7d3d886b01e2824c"
   };
 
   keys = {

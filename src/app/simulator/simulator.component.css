@@ -5,3 +5,17 @@ agm-map {
 .sensor-dashboard {
   margin-top: 20px;
 }
+
+.sensor-chart {
+  margin-top: 0;
+  border-top: none;
+}
+
+.sensor-header {
+  margin-bottom: 0;
+}
+
+.alert {
+  border: 1px solid darkgray;
+  border-radius: 0px;
+}

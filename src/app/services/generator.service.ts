@@ -1,10 +1,18 @@
 import { Injectable } from '@angular/core';
 
+/* GeneratorService: contains helper function for time, hash, ID and byte array generation */
+
 @Injectable()
+
 export class GeneratorService {
 
   constructor() { }
 
+  /**
+   * Generates a 160-bit identification number.
+   *
+   * @returns {string} 160-bit identifier.
+   */
   generate160bitId = function() {
     let id = "";
     let possible = "0123456789abcdef";
@@ -15,6 +23,11 @@ export class GeneratorService {
     return id;
   };
 
+  /**
+   * Generates current time in MySQL format.
+   *
+   * @returns {string} Current time in MySQL format.
+   */
   generateCurrentTime = function() {
     let now     = new Date();
     let year    = now.getFullYear().toString();
@@ -42,6 +55,11 @@ export class GeneratorService {
     return dateTime;
   };
 
+  /**
+   * Generates logistics identifier.
+   *
+   * @returns {string} Current time in MySQL format.
+   */
   generatePackageID = function() {
     let id = "SE";
     let possible = "0123456789";

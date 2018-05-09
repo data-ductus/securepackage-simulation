@@ -152,9 +152,9 @@ export class PostofficeComponent implements OnInit {
         }));
     } else {
       const state = await this.api.getState(this.global.globalvars.agreement_id);
-      if (state == 2) {
+      if (state == 1) {
         this.api.transportBlockchain(this.global.globalvars.agreement_id, this.randomCity());
-      } else if (state == 5) {
+      } else if (state == 4) {
         this.api.transportReturnBlockchain(this.global.globalvars.agreement_id);
       }
       this.router.navigate(['simulation']);

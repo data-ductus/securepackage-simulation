@@ -82,15 +82,14 @@ export class ApiService {
   }
 
   async transportBlockchain(id, returnAddress) {
-    const gas = await this.contracts['agreementDeliver'].methods.transport(id, returnAddress).estimateGas({from: this.global.keys.logistics.public});
-    const abi = await this.contracts['agreementDeliver'].methods.transport(id, returnAddress).encodeABI();
-    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
+    const price = await this.contracts['agreementData'].methods.price(id).call();
+    console.log(price);
+    await this.contracts['token'].methods.approve(id, price).send({from: this.account});
+    await this.contracts['agreementDeliver'].methods.transport(id, returnAddress).send({from: this.account});
   }
 
   async transportReturnBlockchain(id) {
-    const gas = await this.contracts['agreementReturn'].methods.transportReturn(id).estimateGas({from: this.global.keys.logistics.public});
-    const abi = await this.contracts['agreementReturn'].methods.transportReturn(id).encodeABI();
-    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
+    await this.contracts['agreementReturn'].methods.transportReturn(id).send({from: this.account});
   }
 
   async sensorDataBlockchain(id, sensor, data) {
@@ -100,21 +99,16 @@ export class ApiService {
   }
 
   async deliverBlockchain(id) {
-    const gas = await this.contracts['agreementDeliver'].methods.deliver(id).estimateGas({from: this.global.keys.logistics.public});
-    const abi = await this.contracts['agreementDeliver'].methods.deliver(id).encodeABI();
-    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
+    await this.contracts['agreementDeliver'].methods.deliver(id).send({from: this.account});
   }
 
   async deliverReturnBlockchain(id) {
-    const gas = await this.contracts['agreementReturn'].methods.deliverReturn(id).estimateGas({from: this.global.keys.logistics.public});
-    const abi = await this.contracts['agreementReturn'].methods.deliverReturn(id).encodeABI();
-    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys.logistics.private, gas, this.global.keys.logistics.public)
+    await this.contracts['agreementReturn'].methods.deliverReturn(id).send({from: this.account});
   }
 
   watchAccount() {
     this.web3Service.accountsObservable.subscribe((accounts) => {
       this.account = accounts[0];
     });
-
   }
 }

@@ -38,13 +38,15 @@ export class Web3Service {
   async signAndSend(data, addressTo, key, gas, addressFrom) {
     const privateKey = new Buffer(key, 'hex');
     const nonce = await this.web3.eth.getTransactionCount(addressFrom);
+    console.log(nonce);
     const rawTx = {
       nonce: this.web3.utils.toHex(nonce),
       gasPrice: this.web3.utils.toHex(2*10^9),
       gasLimit: this.web3.utils.toHex(200000),
       to: addressTo,
       value: 0,
-      gas: gas + 1000,
+      //gas: gas + 1000,
+      gas: 200000,
       data: data
     };
     const tx = new this.Tx(rawTx);

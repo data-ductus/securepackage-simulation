@@ -50,20 +50,20 @@
       </div>
 
       <!--Accelerometer-->
-      <div *ngIf="accelerometer_sensor_id !== null || (global.globalvars.current_simulation == 'BLOCKCHAIN' && agreement_logistics_data['sensors']['acc']['set'])" class="alert alert-info">
+      <div *ngIf="accelerometer_sensor_id !== null" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Accelerometer</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{accelerometer_sensor_id}}
           (<strong><span class="glyphicon glyphicon-arrow-up"></span> Threshold: </strong>{{agreement_logistics_data.accelerometer}} G)</p>
       </div>
 
       <!--Pressure sensor-->
-      <div *ngIf="pressure_sensor_id !== null || (global.globalvars.current_simulation == 'BLOCKCHAIN' && agreement_logistics_data['sensors']['press']['set'])" class="alert alert-info">
+      <div *ngIf="pressure_sensor_id !== null" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Pressure sensor</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{pressure_sensor_id}}
           (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.pressure_low}} PSI <!--PSI?!??! riktigt dåligt...-->
           <strong> <span class="glyphicon glyphicon-arrow-up"></span> Upper threshold: </strong>{{agreement_logistics_data?.pressure_high}} PSI)</p>
       </div>
-      <div *ngIf="temperature_sensor_id !== null || (global.globalvars.current_simulation == 'BLOCKCHAIN' && agreement_logistics_data['sensors']['maxTemp']['set']) || (global.globalvars.current_simulation == 'BLOCKCHAIN' && agreement_logistics_data['sensors']['minTemp']['set'])" class="alert alert-info">
+      <div *ngIf="temperature_sensor_id !== null" class="alert alert-info">
         <h4><strong><span class="glyphicon glyphicon-dashboard"></span> Temperature sensor</strong></h4>
         <p><strong><span class="glyphicon glyphicon-globe"></span> Identifier: </strong>{{temperature_sensor_id}}
           (<strong><span class="glyphicon glyphicon-arrow-down"></span> Lower threshold: </strong>{{agreement_logistics_data?.temperature_low}} &#8451;

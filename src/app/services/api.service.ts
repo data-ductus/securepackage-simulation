@@ -47,11 +47,11 @@ export class ApiService {
 
   async getSensorsBlockchain(id) {
     try {
-      this.maxTemp = await this.contracts['agreementData'].methods.getSensor(id, 'maxTemp').call();
-      this.minTemp = await this.contracts['agreementData'].methods.getSensor(id, 'minTemp').call();
-      this.acceleration = await this.contracts['agreementData'].methods.getSensor(id, 'acceleration').call();
-      this.humidity = await this.contracts['agreementData'].methods.getSensor(id, 'humidity').call();
-      this.pressure = await this.contracts['agreementData'].methods.getSensor(id, 'pressure').call();
+      this.maxTemp = await this.contracts['agreementData'].methods.getSensor(id, this.global.sensor_id.maxTemp).call();
+      this.minTemp = await this.contracts['agreementData'].methods.getSensor(id, this.global.sensor_id.minTemp).call();
+      this.acceleration = await this.contracts['agreementData'].methods.getSensor(id, this.global.sensor_id.acceleration).call();
+      this.humidity = await this.contracts['agreementData'].methods.getSensor(id, this.global.sensor_id.humidity).call();
+      this.pressure = await this.contracts['agreementData'].methods.getSensor(id, this.global.sensor_id.pressure).call();
       return {maxTemp: this.maxTemp, minTemp: this.minTemp, acc: this.acceleration, hum: this.humidity, press: this.pressure};
     } catch (e) {
       console.log(e);
@@ -68,7 +68,7 @@ export class ApiService {
   }
 
   async getReturnAddress(id) {
-    return this.contracts['agreementData'].methods.returnAddress(id).call();
+    return this.contracts['agreementDeliver'].methods.returnAddress(id).call();
   }
 
   async setProviders(id) {
@@ -90,9 +90,9 @@ export class ApiService {
   }
 
   async setProvider(id, sensor) {
-    const gas =  await this.contracts['agreementDeliver'].methods.setProvider(id, sensor).estimateGas({from: this.global.keys[sensor].public});
-    const abi = await this.contracts['agreementDeliver'].methods.setProvider(id, sensor).encodeABI();
-    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys[sensor].private, gas, this.global.keys[sensor].public);
+    const gas =  await this.contracts['agreementData'].methods.setProvider(id, this.global.sensor_id[sensor]).estimateGas({from: this.global.keys[sensor].public});
+    const abi = await this.contracts['agreementData'].methods.setProvider(id, this.global.sensor_id[sensor]).encodeABI();
+    this.web3Service.signAndSend(abi, this.contracts['agreementData']['_address'], this.global.keys[sensor].private, gas, this.global.keys[sensor].public);
   }
 
   async transportBlockchain(id, returnAddress) {
@@ -107,9 +107,9 @@ export class ApiService {
   }
 
   async sensorDataBlockchain(id, sensor, data) {
-    const gas = await this.contracts['agreementDeliver'].methods.sensorData(id, sensor, data).estimateGas({from: this.global.keys[sensor].public});
-    const abi = await this.contracts['agreementDeliver'].methods.sensorData(id, sensor, data).encodeABI();
-    this.web3Service.signAndSend(abi, this.contracts['agreementDeliver']['_address'], this.global.keys[sensor].private, gas, this.global.keys[sensor].public)
+    const gas = await this.contracts['agreementData'].methods.sensorData(id, this.global.sensor_id[sensor], data).estimateGas({from: this.global.keys[sensor].public});
+    const abi = await this.contracts['agreementData'].methods.sensorData(id, this.global.sensor_id[sensor], data).encodeABI();
+    this.web3Service.signAndSend(abi, this.contracts['agreementData']['_address'], this.global.keys[sensor].private, gas, this.global.keys[sensor].public)
   }
 
   async deliverBlockchain(id) {

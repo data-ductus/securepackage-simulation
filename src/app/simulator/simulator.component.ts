@@ -33,7 +33,7 @@ export class SimulatorComponent implements OnInit {
   violated = false;
 
   //Sensor thresholds
-  simulation_thresholds;
+  simulation_thresholds = {};
 
   //Directions
   direct;
@@ -337,13 +337,13 @@ export class SimulatorComponent implements OnInit {
     if (this.global.globalvars.current_simulation === 'BLOCKCHAIN') {
       if (sensor === 'maxTemp') {
         if (this.api.minTemp['set'] && data < low && !this.api['minTemp']['warning']) {
-          console.log('minTemp', data, low, this.api['minTemp']['warning']);
+          console.log('minTemp', Math.floor(data), low, this.api['minTemp']['warning']);
           await this.api.sensorDataBlockchain(this.global.globalvars.agreement_id, 'minTemp', Math.floor(data));
           this.getSensorsBlockchain();
         }
       }
       if (this.api[sensor]['set'] && data > high && !this.api[sensor]['warning']) {
-        console.log(sensor, data, high, this.api['minTemp']['warning']);
+        console.log(sensor, Math.ceil(data), high, this.api[sensor]['warning']);
         await this.api.sensorDataBlockchain(this.global.globalvars.agreement_id, sensor, Math.ceil(data));
         this.getSensorsBlockchain();
       }

@@ -7,9 +7,9 @@ import {Web3Service} from "./web3.service";
 
 export class GlobalsService {
 
-  agreementDeliverJson = require('../../../build/contracts/purchase.json');
-  agreementReturnJson = require('../../../build/contracts/purchase2.json');
-  agreementDataJson = require('../../../build/contracts/purchaseData.json');
+  agreementDeliverJson = require('../../../build/contracts/agreementDeliver.json');
+  agreementReturnJson = require('../../../build/contracts/agreementReturn.json');
+  agreementDataJson = require('../../../build/contracts/agreementData.json');
   tokenJson = require('../../../build/contracts/token.json');
 
   globalvars = {
@@ -43,6 +43,14 @@ export class GlobalsService {
       'private': "45c96f3f905b3b7280c3ca4d2d14c3459710b551a0e1c87a6f773f9b08ac4d33",
       'public': "0x75b8a982eC411f40EB06dc210cD539b61D1405B7"
     }
+  };
+
+  sensor_id = {
+    maxTemp: 0,
+    minTemp: 1,
+    acceleration: 2,
+    humidity: 3,
+    pressure: 4,
   };
 
   contracts = {};
